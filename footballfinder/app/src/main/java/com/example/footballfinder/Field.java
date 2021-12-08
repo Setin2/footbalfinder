@@ -4,13 +4,13 @@ package com.example.footballfinder;
  * Class representing fields
  */
 public class Field {
-    private int id;
-    private String description;
-    private String location;
-    private float lat;
-    private float lon;
-    private String type;
-    private String owner;
+    int id;
+    String description;
+    String location;
+    float lat;
+    float lon;
+    String type;
+    String owner;
 
     /*
      * Constructor

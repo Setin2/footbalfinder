@@ -19,34 +19,22 @@ import org.json.JSONObject;
 
 public class httpHelper {
 
-    private String url = "http://localhost:3000/gui";
+    private String url = "https://test-backend-psi.vercel.app/footballfinder";
     private RequestQueue queue;
 
     public httpHelper(Context con){
         queue = Volley.newRequestQueue(con);
     }
 
-    public void getRequest(Consumer<JSONObject> responseConsumer){
-        JSONObject body = new JSONObject();
-        try {
-            body.put("case", "getorders");
-        }
-        catch (JSONException e) {
-            Log.d("json", "Json error");
-        }
-        Log.d("test", body.toString());
+    public void postRequest(Consumer<JSONObject> responseConsumer, JSONObject body){
+        JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url, body,
+                response -> {
+                    responseConsumer.accept(response);
+                }
+                , error -> {
+            Log.d("http error","error: " + error.toString());
 
-        JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.GET, url, body,
-            response -> {
-                responseConsumer.accept(response);
-            }
-            , error -> {
-                Log.d("http error","error: " + error.toString());
-
-            });
-        Log.d("done", "done");
-
-
+        });
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }

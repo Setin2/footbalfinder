@@ -4,13 +4,13 @@ package com.example.footballfinder;
  * Class representing users
  */
 public class Event {
-    private int id;
-    private int fieldID;
-    private int maxParticipant;
-    private int ownerID;
-    private String description;
-    private long start_time;
-    private long end_time;
+    int id;
+    int fieldID;
+    int maxParticipant;
+    int ownerID;
+    String description;
+    long start_time;
+    long end_time;
 
     /*
      * Constructor

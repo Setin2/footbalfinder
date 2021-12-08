@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.util.Consumer;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,13 +24,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private static final int MY_REQUEST_INT = 177;
-    private Database db;
     private ArrayList<Field> fields;
     private int userID;
 
@@ -41,8 +45,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         com.example.footballfinder.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        db = new Database();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -77,16 +79,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             googleMap.setMyLocationEnabled(true);
         }
 
-        /*
-        fields = Database.getFields(db.getExtraConnection());
-        for (Field field : fields) {
-            MarkerOptions marker = new MarkerOptions()
-                    .position(new LatLng(field.getLat(), field.getLon()))
-                    .title(String.valueOf(field.getId()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            googleMap.addMarker(marker);
-        }*/
-
         // add a random marker for testing
         MarkerOptions marker = new MarkerOptions()
                 .position(new LatLng(1, 2))
@@ -95,15 +87,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.addMarker(marker);
     }
 
+    
     /*
      * Open MakerEvents activity. Contains a recyclerview with the events for this field
      */
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        Intent intent = new Intent(getApplicationContext(), MarkerEvents.class);
+        Intent intent = new Intent(this, MarkerEvents.class);
         intent.putExtra("markerId", Integer.parseInt(Objects.requireNonNull(marker.getTitle())));
         intent.putExtra("userID", userID);
         startActivity(intent);
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

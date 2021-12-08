@@ -92,7 +92,7 @@ public class AddEvent extends AppCompatActivity {
         if (getMaxParticipants() == 0 || getDescription().isEmpty() || txtDate.getText().toString().isEmpty() || txtTime.getText().toString().isEmpty())
             Snackbar.make(findViewById(R.id.addEvent), "invalid details", Snackbar.LENGTH_SHORT).show();
         else {
-            if (internetConnectionAvailable()){
+            if (Internet.internetConnectionAvailable(this)){
                 // get the start datetime
                 Date startDate = cal.getTime();
                 // get the end datetime
@@ -191,26 +191,4 @@ public class AddEvent extends AppCompatActivity {
         });
     }
 
-    /*
-     * Return true if the device is connected to the internet
-     */
-    private boolean internetConnectionAvailable(){
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        // we return true if connection is available
-        assert connectivityManager != null;
-        if (Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)).getState() == NetworkInfo.State.CONNECTED ||
-                Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)).getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        }
-        // else we alert the user that connection to internet is missing
-        else {
-            android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(AddEvent.this);
-            dialog.setTitle( "ERROR" )
-                    .setMessage("Task failed due to missing connection to internet")
-                    .setPositiveButton("OK", (dialoginterface, i) -> {
-                        dialoginterface.cancel();
-                    }).show();
-            return false;
-        }
-    }
 }

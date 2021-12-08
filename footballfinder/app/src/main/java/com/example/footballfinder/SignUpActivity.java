@@ -31,7 +31,7 @@ public class SignUpActivity extends AppCompatActivity {
             getUserName();
             getUserPassword();
             if (!username.isEmpty() && !password.isEmpty()){
-                if (internetConnectionAvailable()){
+                if (Internet.internetConnectionAvailable(this)){
                     User user = new User(0, username, password);
                     Snackbar.make(findViewById(R.id.signUpActivity), "User created successfully", Snackbar.LENGTH_SHORT).show();
                 }
@@ -66,26 +66,4 @@ public class SignUpActivity extends AppCompatActivity {
         finish();
     }
 
-    /*
-     * Return true if the device is connected to the internet
-     */
-    private boolean internetConnectionAvailable(){
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        // we return true if connection is available
-        assert connectivityManager != null;
-        if (Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)).getState() == NetworkInfo.State.CONNECTED ||
-                Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)).getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        }
-        // else we alert the user that connection to internet is missing
-        else {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(SignUpActivity.this);
-            dialog.setTitle( "ERROR" )
-                    .setMessage("Task failed due to missing connection to internet")
-                    .setPositiveButton("OK", (dialoginterface, i) -> {
-                        dialoginterface.cancel();
-                    }).show();
-            return false;
-        }
-    }
 }
