@@ -24,11 +24,12 @@ public class Field {
     double lon;
     String type;
     String owner;
+    boolean event_today;
 
     /*
      * Constructor
      */
-    public Field(int id, String description, String location, double lat, double lon, String type, String owner){
+    public Field(int id, String description, String location, double lat, double lon, String type, String owner, boolean event_today){
         this.id = id;
         this.description = description;
         this.location = location;
@@ -36,6 +37,7 @@ public class Field {
         this.lon = lon;
         this.type = type;
         this.owner = owner;
+        this.event_today = event_today;
     }
 
     public static void getAllFields(Context con, Consumer<ArrayList<Field>> consumer, Consumer<VolleyError> errorHandler){
@@ -53,15 +55,7 @@ public class Field {
                 JSONArray fields_data = (JSONArray) data.get("data");
                 for(int i = 0; i < fields_data.length(); i++){
                     JSONObject f = (JSONObject) fields_data.get(i);
-                    Field field = new Field(
-                            f.getInt("id"),
-                            f.getString("description"),
-                            f.getString("location"),
-                            f.getDouble("lat"),
-                            f.getDouble("lon"),
-                            f.getString("type"),
-                            f.getString("owner")
-                    );
+                    Field field = getFieldFromJSON(f);
                     fields.add(field);
                 }
                 consumer.accept(fields);
@@ -69,7 +63,20 @@ public class Field {
             }
 
         }, errorHandler::accept);
+    }
 
+    public static Field getFieldFromJSON(JSONObject field_json) throws Exception{
+        Field field = new Field(
+                field_json.getInt("id"),
+                field_json.getString("description"),
+                field_json.getString("location"),
+                field_json.getDouble("lat"),
+                field_json.getDouble("lon"),
+                field_json.getString("type"),
+                field_json.getString("owner"),
+                field_json.getBoolean("event_today"));
+
+        return field;
     }
 
 }

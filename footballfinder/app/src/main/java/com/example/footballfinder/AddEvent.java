@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.footballfinder.databinding.ActivityAddEventBinding;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -52,6 +53,8 @@ public class AddEvent extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fieldID = getIntent().getIntExtra("fieldID", -1);
+        userID = getIntent().getIntExtra("userID", -1);
 
         // get binding
         binding = ActivityAddEventBinding.inflate(getLayoutInflater());
@@ -93,21 +96,49 @@ public class AddEvent extends AppCompatActivity {
             Snackbar.make(findViewById(R.id.addEvent), "invalid details", Snackbar.LENGTH_SHORT).show();
         else {
             if (Internet.internetConnectionAvailable(this)){
+
                 // get the start datetime
                 Date startDate = cal.getTime();
                 // get the end datetime
-                cal.add(Calendar.HOUR, getPlayTime());
+                cal.add(Calendar.HOUR, getDuration());
                 Date endDate = cal.getTime();
-                // create new event
-                Event event = new Event(1, fieldID, getMaxParticipants(), userID, getDescription(), startDate.getTime(), endDate.getTime());
-                // notify user
-                Snackbar.make(findViewById(R.id.addEvent), "event added", Snackbar.LENGTH_SHORT).show();
-                // add this event to the recyclerview
-                new Handler().postDelayed(() -> {
-                    MarkerEvents.viewableEvents.add(0, event);
-                    MarkerEvents.adapter.notifyItemInserted(0);
-                    ( (LinearLayoutManager) Objects.requireNonNull(MarkerEvents.recyclerView.getLayoutManager())).scrollToPositionWithOffset(0, 0);
-                }, 500);
+
+                String pattern = "yyyy-MM-dd hh:mm:ss";
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                String date = simpleDateFormat.format(new Date());
+
+
+                Event event = new Event(
+                        -1,
+                        fieldID,
+                        getMaxParticipants(),
+                        userID,
+                        getDescription(),
+                        simpleDateFormat.format(startDate),
+                        simpleDateFormat.format(endDate),
+                        null
+                );
+
+                Event.addEvent(this, event, createdEvent -> {
+
+                    new Handler().postDelayed(() -> {
+                        MarkerEvents.viewableEvents.add(0, createdEvent);
+                        MarkerEvents.adapter.notifyItemInserted(0);
+                        ( (LinearLayoutManager) Objects.requireNonNull(MarkerEvents.recyclerView.getLayoutManager())).scrollToPositionWithOffset(0, 0);
+                    }, 500);
+                    Snackbar snack = Snackbar.make(findViewById(R.id.addEvent), "Event added", Snackbar.LENGTH_SHORT);
+                    snack.addCallback( new Snackbar.Callback() {
+
+                        @Override
+                        public void onDismissed(Snackbar snackbar, int event) {
+                            finish();
+                        }
+
+                    });
+                    snack.show();
+                }, error -> {
+
+                });
             }
             else
                 Snackbar.make(findViewById(R.id.addEvent), "no internet connection", Snackbar.LENGTH_SHORT).show();
@@ -137,7 +168,7 @@ public class AddEvent extends AppCompatActivity {
     /*
      * Get hours of playtime from input
      */
-    private int getPlayTime(){
+    private int getDuration(){
         EditText max = findViewById(R.id.playTime);
         return Integer.parseInt(max.getText().toString().trim());
     }

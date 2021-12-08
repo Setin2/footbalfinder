@@ -26,13 +26,33 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signUp() {
-        final Button login = (Button) findViewById(R.id.signUp);
-        login.setOnClickListener((View v) -> {
-            getUserName();
-            getUserPassword();
+        final Button signup = (Button) findViewById(R.id.signUp);
+        signup.setOnClickListener((View v) -> {
+            username = getUserName();
+            password = getUserPassword();
             if (!username.isEmpty() && !password.isEmpty()){
                 if (Internet.internetConnectionAvailable(this)){
-                    Snackbar.make(findViewById(R.id.signUpActivity), "User created successfully", Snackbar.LENGTH_SHORT).show();
+                    User.createUser(this, username, password, user -> {
+                        Snackbar snack = Snackbar.make(findViewById(R.id.signUpActivity), "User created successfully", Snackbar.LENGTH_SHORT);
+
+                        snack.addCallback( new Snackbar.Callback() {
+
+                            @Override
+                            public void onDismissed(Snackbar snackbar, int event) {
+                                finish();
+                            }
+
+                        });
+                        snack.show();
+
+                    }, error -> {
+                        if(error.networkResponse.statusCode == 409){
+                            Snackbar.make(findViewById(R.id.signUpActivity), "Username is already taken", Snackbar.LENGTH_SHORT).show();
+                        }else{
+                            Snackbar.make(findViewById(R.id.signUpActivity), "Server error", Snackbar.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
             } else {
                 Snackbar.make(findViewById(R.id.signUpActivity), "Please fill in the text", Snackbar.LENGTH_SHORT).show();
@@ -43,18 +63,18 @@ public class SignUpActivity extends AppCompatActivity {
     /*
      * Get the username from the input
      */
-    private void getUserName(){
+    private String getUserName(){
         EditText name = findViewById(R.id.new_user_name);
-        username = name.getText().toString().trim();
+        return name.getText().toString().trim();
     }
 
     /*
      * Get the password from the input
      */
-    private void getUserPassword(){
+    private String getUserPassword(){
         // once the confirm id button is clicked, the current text in the edit-text is stored as the userId
         EditText pass = findViewById(R.id.new_user_password);
-        password = pass.getText().toString().trim();
+        return pass.getText().toString().trim();
     }
 
     /*

@@ -45,15 +45,12 @@ public class MyListEventAdapter extends RecyclerView.Adapter<MyListEventAdapter.
         final Event event = this.events.get(position);
 
         // gonna have to find owner username based on event owner id
-        holder.eventOwner.setText("UserName");
+        holder.eventOwner.setText(event.owner_username);
 
-        holder.description.setText(event.getDescription());
-        holder.maxParticipants.setText(String.valueOf(event.getMaxParticipant()));
+        holder.description.setText(event.description);
+        holder.maxParticipants.setText(String.valueOf(event.maxParticipant));
 
-        // get start and end time for the event in string format
-        String startTime = new SimpleDateFormat("dd.MMMMM.yyyy hh:mm aaa", Locale.ENGLISH).format(new Date(event.getStart_time()));
-        String endTime = new SimpleDateFormat("dd.MMMMM.yyyy hh:mm aaa", Locale.ENGLISH).format(new Date(event.getEnd_time()));
-        holder.event_time.setText(startTime + " - " + endTime);
+        holder.event_time.setText(event.start_time + " - " + event.end_time);
     }
 
     /*

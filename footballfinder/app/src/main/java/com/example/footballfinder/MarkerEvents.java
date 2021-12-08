@@ -32,7 +32,6 @@ public class MarkerEvents extends AppCompatActivity {
     public static ArrayList<Event> viewableEvents;
     private ArrayList<Event> events;
     private LinearLayoutManager manager;
-    private Marker marker;
     private int fieldID;
     private int userID;
 
@@ -44,8 +43,7 @@ public class MarkerEvents extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fieldID = getIntent().getIntExtra("fieldID", -1);
-        Logger.log("EVENT!!! on: ", fieldID);
-
+        userID = getIntent().getIntExtra("userID", -1);
         // set binding
         ActivityMarkerEventsBinding binding = ActivityMarkerEventsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -63,16 +61,19 @@ public class MarkerEvents extends AppCompatActivity {
             startActivity(intent);
         });
 
-        if (Internet.internetConnectionAvailable(this)){
-            events = new ArrayList<>();
-            viewableEvents = new ArrayList<>();
-            if (events.size() > 20)
-                viewableEvents = new ArrayList<>(events.subList(0, 20));
-            else
-                viewableEvents = new ArrayList<>(events.subList(0, events.size()));
+        loadEvents();
+    }
 
-            viewableEvents.add(new Event(1, 2, 15, 4, "This is description nr 1", 1423412, 23151325));
+    private void loadEvents(){
+        events = new ArrayList<>();
+        viewableEvents = new ArrayList<>();
 
+        Event.getEventsOnFieldToday(this, fieldID, events -> {
+
+            for(int i = 0; i < events.size(); i++){
+                Logger.log(events.get(i).description);
+                viewableEvents.add(events.get(i));
+            }
             recyclerView = findViewById(R.id.events);
             manager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(manager);
@@ -83,9 +84,11 @@ public class MarkerEvents extends AppCompatActivity {
             DividerItemDecoration itemDecorator = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
             itemDecorator.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(getApplicationContext(), R.drawable.divider)));
             recyclerView.addItemDecoration(itemDecorator);
-
             scrolling();
-        }
+            Logger.log(viewableEvents.size());
+        }, error -> {
+
+        });
     }
 
     /*

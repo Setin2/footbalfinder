@@ -16,7 +16,6 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
@@ -124,5 +123,8 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="max_participant">max participant</string>
     <string name="description">description</string>
-    <string name="play_time">play time</string>
+    <string name="play_time">duration (hours)</string>
+    <string name="show_all_fields">Show all</string>
+    <string name="show_events_today">Events</string>
+    <string name="logout">Logout</string>
 </resources>

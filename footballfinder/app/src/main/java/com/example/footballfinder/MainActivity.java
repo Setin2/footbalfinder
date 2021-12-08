@@ -21,45 +21,51 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    //private TextView view;
-    private String username;
-    private String password;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
-        logIn();
-        createAccount();
+        loginListener();
+        signupListener();
     }
 
-    private void logIn() {
+    private void loginListener() {
+
         final Button login = findViewById(R.id.login);
         login.setOnClickListener((View v) -> {
             if (Internet.internetConnectionAvailable(this)){
-                getUserName();
-                getUserPassword();
-                // if user exists
-                if (true){
-                    Intent intent = new Intent(this, MapsActivity.class);
-                    intent.putExtra("userID", 0); // pus some random id for now
-                    startActivity(intent);
-                }
-                else {
-                    Snackbar.make(findViewById(R.id.mainActivity), "User does not exist", Snackbar.LENGTH_SHORT).show();
-                }
+                User.userLogin(this, getUsername(), getPassword(), user -> {
+                    openMapActivity(user.id);
+                }, error -> {
+                    if(error.networkResponse.statusCode == 401){
+                        Snackbar.make(findViewById(R.id.mainActivity), "Invalid login", Snackbar.LENGTH_SHORT).show();
+                    }else{
+                        Snackbar.make(findViewById(R.id.mainActivity), "Server error", Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+            }else{
+                Snackbar.make(findViewById(R.id.mainActivity), "No internet connection", Snackbar.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void openMapActivity(int userID){
+        if(MapsActivity.active == false){
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            intent.putExtra("userID", userID); // pus some random id for now
+            startActivity(intent);
+        }
+
     }
 
     /*
      * Go to SignUp activity
      */
-    private void createAccount() {
-        final Button login = findViewById(R.id.signUp);
-        login.setOnClickListener((View v) -> {
+    private void signupListener() {
+        final Button signup = findViewById(R.id.signUp);
+        signup.setOnClickListener((View v) -> {
             Intent intent = new Intent(this, SignUpActivity.class);
             startActivity(intent);
         });
@@ -68,17 +74,17 @@ public class MainActivity extends AppCompatActivity {
     /*
      * Take the username from the input
      */
-    private void getUserName(){
+    private String getUsername(){
         EditText name = findViewById(R.id.user_name);
-        username = name.getText().toString().trim();
+        return name.getText().toString().trim();
     }
 
     /*
      * Take the password from the input
      */
-    private void getUserPassword(){
+    private String getPassword(){
         // once the confirm id button is clicked, the current text in the edit-text is stored as the userId
         EditText pass = findViewById(R.id.user_password);
-        password = pass.getText().toString().trim();
+        return pass.getText().toString().trim();
     }
 }
