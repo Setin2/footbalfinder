@@ -32,7 +32,6 @@ public class SignUpActivity extends AppCompatActivity {
             getUserPassword();
             if (!username.isEmpty() && !password.isEmpty()){
                 if (Internet.internetConnectionAvailable(this)){
-                    User user = new User(0, username, password);
                     Snackbar.make(findViewById(R.id.signUpActivity), "User created successfully", Snackbar.LENGTH_SHORT).show();
                 }
             } else {

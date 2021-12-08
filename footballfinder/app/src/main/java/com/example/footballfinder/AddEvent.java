@@ -41,7 +41,7 @@ public class AddEvent extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityAddEventBinding binding;
-    private int fieldId;
+    private int fieldID;
     private int userID;
 
     Button btnDatePicker, btnTimePicker;
@@ -99,7 +99,7 @@ public class AddEvent extends AppCompatActivity {
                 cal.add(Calendar.HOUR, getPlayTime());
                 Date endDate = cal.getTime();
                 // create new event
-                Event event = new Event(1, fieldId, getMaxParticipants(), userID, getDescription(), startDate.getTime(), endDate.getTime());
+                Event event = new Event(1, fieldID, getMaxParticipants(), userID, getDescription(), startDate.getTime(), endDate.getTime());
                 // notify user
                 Snackbar.make(findViewById(R.id.addEvent), "event added", Snackbar.LENGTH_SHORT).show();
                 // add this event to the recyclerview

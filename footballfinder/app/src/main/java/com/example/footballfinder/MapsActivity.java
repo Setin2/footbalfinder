@@ -4,16 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.util.Consumer;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -25,6 +32,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -63,8 +71,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        googleMap.setOnMarkerClickListener(this);
+    public void onMapReady(@NonNull GoogleMap map) {
+        map.setOnMarkerClickListener(this);
         // Here We want to check the permission of Location - GPS
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -76,25 +84,49 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         } else {
             // Here the code of Grand Permission
-            googleMap.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(true);
         }
-
-        // add a random marker for testing
-        MarkerOptions marker = new MarkerOptions()
-                .position(new LatLng(1, 2))
-                .title(String.valueOf(2))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        googleMap.addMarker(marker);
+        map.moveCamera(getCurrentLocation());
+        loadFieldsIntoMap(map);
     }
 
-    
+    private CameraUpdate getCurrentLocation(){
+        if(ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED){
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            CameraUpdate point = CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f);
+            return point;
+        }
+        return CameraUpdateFactory.newLatLngZoom(new LatLng(55.4038, 10.4024), 12.0f);
+    }
+
+    private void loadFieldsIntoMap(GoogleMap map){
+        Field.getAllFields(this, data -> {
+            fields = data;
+
+            for(int i = 0; i < fields.size(); i++){
+                Field field = fields.get(i);
+                MarkerOptions marker = new MarkerOptions()
+                        .position(new LatLng(field.lat, field.lon))
+                        .title(String.valueOf(field.id))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                map.addMarker(marker);
+            }
+        }, error -> {
+
+        });
+    }
+
+
     /*
      * Open MakerEvents activity. Contains a recyclerview with the events for this field
      */
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(this, MarkerEvents.class);
-        intent.putExtra("markerId", Integer.parseInt(Objects.requireNonNull(marker.getTitle())));
+        intent.putExtra("fieldID", Integer.parseInt(marker.getTitle()));
         intent.putExtra("userID", userID);
         startActivity(intent);
         return true;

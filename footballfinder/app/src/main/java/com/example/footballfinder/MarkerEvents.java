@@ -6,9 +6,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -30,7 +32,8 @@ public class MarkerEvents extends AppCompatActivity {
     public static ArrayList<Event> viewableEvents;
     private ArrayList<Event> events;
     private LinearLayoutManager manager;
-    private int markerId;
+    private Marker marker;
+    private int fieldID;
     private int userID;
 
     private boolean isScrolling;                        // boolean telling if the user is scrolling
@@ -40,9 +43,11 @@ public class MarkerEvents extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fieldID = getIntent().getIntExtra("fieldID", -1);
+        Logger.log("EVENT!!! on: ", fieldID);
 
         // set binding
-        com.example.footballfinder.databinding.ActivityMarkerEventsBinding binding = ActivityMarkerEventsBinding.inflate(getLayoutInflater());
+        ActivityMarkerEventsBinding binding = ActivityMarkerEventsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         // add toolbar
         Toolbar toolbar = binding.toolbar;
@@ -53,7 +58,7 @@ public class MarkerEvents extends AppCompatActivity {
         FloatingActionButton fab = binding.fab;
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(getApplicationContext(), AddEvent.class);
-            intent.putExtra("fieldId", markerId);
+            intent.putExtra("fieldID", fieldID);
             intent.putExtra("userID", userID);
             startActivity(intent);
         });

@@ -1,5 +1,18 @@
 package com.example.footballfinder;
 
+import android.content.Context;
+import android.util.Log;
+
+import androidx.core.util.Consumer;
+
+import com.android.volley.VolleyError;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 /*
  * Class representing fields
  */
@@ -7,15 +20,15 @@ public class Field {
     int id;
     String description;
     String location;
-    float lat;
-    float lon;
+    double lat;
+    double lon;
     String type;
     String owner;
 
     /*
      * Constructor
      */
-    public Field(int id, String description, String location, float lat, float lon, String type, String owner){
+    public Field(int id, String description, String location, double lat, double lon, String type, String owner){
         this.id = id;
         this.description = description;
         this.location = location;
@@ -25,59 +38,38 @@ public class Field {
         this.owner = owner;
     }
 
-    public String getOwner() {
-        return owner;
+    public static void getAllFields(Context con, Consumer<ArrayList<Field>> consumer, Consumer<VolleyError> errorHandler){
+        httpHelper http = new httpHelper(con);
+        ArrayList<Field> fields = new ArrayList<>();
+        JSONObject body = new JSONObject();
+        try{
+            body.put("case", "getfields");
+        }catch(Exception e){
+
+        }
+
+        http.postRequest(body, data -> {
+            try{
+                JSONArray fields_data = (JSONArray) data.get("data");
+                for(int i = 0; i < fields_data.length(); i++){
+                    JSONObject f = (JSONObject) fields_data.get(i);
+                    Field field = new Field(
+                            f.getInt("id"),
+                            f.getString("description"),
+                            f.getString("location"),
+                            f.getDouble("lat"),
+                            f.getDouble("lon"),
+                            f.getString("type"),
+                            f.getString("owner")
+                    );
+                    fields.add(field);
+                }
+                consumer.accept(fields);
+            }catch (Exception e){
+            }
+
+        }, errorHandler::accept);
+
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public float getLon() {
-        return lon;
-    }
-
-    public void setLon(float lon) {
-        this.lon = lon;
-    }
-
-    public float getLat() {
-        return lat;
-    }
-
-    public void setLat(float lat) {
-        this.lat = lat;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }
