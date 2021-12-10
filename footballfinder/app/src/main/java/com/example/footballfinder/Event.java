@@ -23,11 +23,12 @@ public class Event {
     String start_time;
     String end_time;
     String owner_username;
+    int participants;
 
     /*
      * Constructor
      */
-    public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time, String owner_username){
+    public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time, String owner_username, int participants){
         this.id = id;
         this.fieldID = fieldID;
         this.maxParticipant = maxParticipant;
@@ -36,6 +37,11 @@ public class Event {
         this.start_time = start_time;
         this.end_time = end_time;
         this.owner_username = owner_username;
+        this.participants = participants;
+    }
+
+    public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time){
+        this(id, fieldID, maxParticipant, ownerID, description, start_time, end_time, "", 0);
     }
 
     public static void getEventsOnFieldToday(Context con, int fieldID, Consumer<ArrayList<Event>> consumer, Consumer<VolleyError> errorHandler){
@@ -59,10 +65,38 @@ public class Event {
                 }
                 consumer.accept(events);
             }catch (Exception e){
-                Logger.log("WTFFERROR?");
             }
+            http.stopQueue();
 
-        }, errorHandler::accept);
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
+
+    }
+
+    public static void getEventOnId(Context con, int eventID, Consumer<Event> consumer, Consumer<VolleyError> errorHandler){
+        httpHelper http = new httpHelper(con);
+        JSONObject body = new JSONObject();
+        try{
+            body.put("case", "geteventbyid");
+            body.put("id", eventID);
+        }catch(Exception e){
+
+        }
+        http.postRequest(body, data -> {
+            try{
+                JSONObject event_data = (JSONObject) data.get("data");
+                event_data = (JSONObject) event_data.get("event");
+                Event event = eventFromJSON(event_data);
+                consumer.accept(event);
+            }catch (Exception e){
+            }
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
 
     }
 
@@ -82,7 +116,7 @@ public class Event {
 
         }
 
-        http.postRequest(body, data -> {
+        http.postRequestNoTimeout(body, data -> {
             try{
                 JSONObject event_data = (JSONObject) data.get("data");
                 event_data = (JSONObject) event_data.get("event");
@@ -91,9 +125,34 @@ public class Event {
                 consumer.accept(e);
             }catch (Exception e){
             }
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
+    }
 
-        }, errorHandler::accept);
+    public static void joinEvent(Context con, int eventID, int userID, Consumer<String> consumer, Consumer<VolleyError> errorHandler){
+        httpHelper http = new httpHelper(con);
+        JSONObject body = new JSONObject();
+        try{
+            body.put("case", "joinevent");
+            body.put("event_id", eventID);
+            body.put("user_id", userID);
+        }catch(Exception e){
 
+        }
+
+        http.postRequestNoTimeout(body, joined -> {
+            try{
+                consumer.accept("Event joined");
+            }catch (Exception e){
+            }
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
     }
 
     public static Event eventFromJSON(JSONObject event_json) throws Exception{
@@ -105,7 +164,9 @@ public class Event {
                 event_json.getString("description"),
                 event_json.getString("start_time"),
                 event_json.getString("end_time"),
-                event_json.getString("owner_username"));
+                event_json.getString("owner_username"),
+                event_json.getInt("participants")
+                );
 
         return event;
     }

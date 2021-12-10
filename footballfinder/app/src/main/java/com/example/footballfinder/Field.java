@@ -39,6 +39,9 @@ public class Field {
         this.owner = owner;
         this.event_today = event_today;
     }
+    public Field(int id, String description, String location, double lat, double lon, String type, String owner){
+        this(id, description, location, lat, lon, type, owner, false);
+    }
 
     public static void getAllFields(Context con, Consumer<ArrayList<Field>> consumer, Consumer<VolleyError> errorHandler){
         httpHelper http = new httpHelper(con);
@@ -61,8 +64,11 @@ public class Field {
                 consumer.accept(fields);
             }catch (Exception e){
             }
-
-        }, errorHandler::accept);
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
     }
 
     public static Field getFieldFromJSON(JSONObject field_json) throws Exception{

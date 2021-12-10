@@ -10,6 +10,14 @@
         android:title="@string/show_events_today"
         app:showAsAction="never" />
     <item
+        android:id="@+id/reload_events"
+        android:title="@string/reload_events"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/my_joined_events"
+        android:title="@string/my_joined_events"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/logout"
         android:title="@string/logout"
         app:showAsAction="never" />

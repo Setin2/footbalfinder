@@ -72,7 +72,6 @@ public class SignUpActivity extends AppCompatActivity {
      * Get the password from the input
      */
     private String getUserPassword(){
-        // once the confirm id button is clicked, the current text in the edit-text is stored as the userId
         EditText pass = findViewById(R.id.new_user_password);
         return pass.getText().toString().trim();
     }

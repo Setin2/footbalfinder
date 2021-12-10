@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Debug.testActivity(this, MapsActivity.class); //Debugging
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         login.setOnClickListener((View v) -> {
             if (Internet.internetConnectionAvailable(this)){
                 User.userLogin(this, getUsername(), getPassword(), user -> {
-                    openMapActivity(user.id);
+                    openMapActivity();
                 }, error -> {
                     if(error.networkResponse.statusCode == 401){
                         Snackbar.make(findViewById(R.id.mainActivity), "Invalid login", Snackbar.LENGTH_SHORT).show();
@@ -51,10 +53,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void openMapActivity(int userID){
+    private void openMapActivity(){
         if(MapsActivity.active == false){
             Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-            intent.putExtra("userID", userID); // pus some random id for now
             startActivity(intent);
         }
 
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
      * Take the password from the input
      */
     private String getPassword(){
-        // once the confirm id button is clicked, the current text in the edit-text is stored as the userId
         EditText pass = findViewById(R.id.user_password);
         return pass.getText().toString().trim();
     }

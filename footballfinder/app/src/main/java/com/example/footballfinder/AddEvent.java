@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -43,18 +44,17 @@ public class AddEvent extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityAddEventBinding binding;
     private int fieldID;
-    private int userID;
 
     Button btnDatePicker, btnTimePicker;
     TextView txtDate, txtTime;
     private int mYear, mMonth, mDay, mHour, mMinute;
     Calendar cal;
+    private boolean createSent = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fieldID = getIntent().getIntExtra("fieldID", -1);
-        userID = getIntent().getIntExtra("userID", -1);
 
         // get binding
         binding = ActivityAddEventBinding.inflate(getLayoutInflater());
@@ -65,8 +65,6 @@ public class AddEvent extends AppCompatActivity {
         fab.setOnClickListener(view -> {
             addEvent();
         });
-        final View dialogView = View.inflate(AddEvent.this, R.layout.activity_add_event, null);
-        final AlertDialog alertDialog = new AlertDialog.Builder(AddEvent.this).create();
 
         pickDateTime();
         cal = Calendar.getInstance();
@@ -90,54 +88,49 @@ public class AddEvent extends AppCompatActivity {
     /*
      * Create a new event with given data
      */
-    private void addEvent(){
+    private synchronized void addEvent(){
+        if(createSent){
+            return;
+        }
         // some fields are left empty
         if (getMaxParticipants() == 0 || getDescription().isEmpty() || txtDate.getText().toString().isEmpty() || txtTime.getText().toString().isEmpty())
             Snackbar.make(findViewById(R.id.addEvent), "invalid details", Snackbar.LENGTH_SHORT).show();
         else {
             if (Internet.internetConnectionAvailable(this)){
 
-                // get the start datetime
                 Date startDate = cal.getTime();
-                // get the end datetime
-                cal.add(Calendar.HOUR, getDuration());
-                Date endDate = cal.getTime();
 
-                String pattern = "yyyy-MM-dd hh:mm:ss";
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-                String date = simpleDateFormat.format(new Date());
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(startDate);
+                calendar.add(Calendar.HOUR_OF_DAY, getDuration());
+                Date endDate = calendar.getTime();
 
+                String pattern = "yyyy-MM-dd HH:mm:SS";
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.GERMAN);
+
+                String start = simpleDateFormat.format(startDate);
+                String end = simpleDateFormat.format(endDate);
 
                 Event event = new Event(
                         -1,
                         fieldID,
                         getMaxParticipants(),
-                        userID,
+                        User.getCurrentUser().id,
                         getDescription(),
-                        simpleDateFormat.format(startDate),
-                        simpleDateFormat.format(endDate),
-                        null
+                        start,
+                        end
                 );
 
+                createSent = true;
                 Event.addEvent(this, event, createdEvent -> {
-
-                    new Handler().postDelayed(() -> {
-                        MarkerEvents.viewableEvents.add(0, createdEvent);
-                        MarkerEvents.adapter.notifyItemInserted(0);
-                        ( (LinearLayoutManager) Objects.requireNonNull(MarkerEvents.recyclerView.getLayoutManager())).scrollToPositionWithOffset(0, 0);
-                    }, 500);
-                    Snackbar snack = Snackbar.make(findViewById(R.id.addEvent), "Event added", Snackbar.LENGTH_SHORT);
-                    snack.addCallback( new Snackbar.Callback() {
-
-                        @Override
-                        public void onDismissed(Snackbar snackbar, int event) {
-                            finish();
-                        }
-
-                    });
-                    snack.show();
+                    finish();
                 }, error -> {
-
+                    createSent = false;
+                    if(error.networkResponse.statusCode == 409){
+                        Snackbar.make(findViewById(R.id.addEvent), "Overlaps another event, change time", Snackbar.LENGTH_SHORT).show();
+                    }else{
+                        Snackbar.make(findViewById(R.id.addEvent), "Server error", Snackbar.LENGTH_SHORT).show();
+                    }
                 });
             }
             else

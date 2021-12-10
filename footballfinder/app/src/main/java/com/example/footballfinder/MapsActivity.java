@@ -48,20 +48,18 @@ import java.util.Objects;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private static final int MY_REQUEST_INT = 177;
-    private ArrayList<Field> fields;
-    private int userID;
     public static boolean active = false;
     private Map<Marker, Field> markerMap = new HashMap<>();
+    private GoogleMap event_map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userID = getIntent().getIntExtra("userID", -1);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        com.example.footballfinder.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
 
@@ -78,6 +76,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStart();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    protected void onResume() {
+        reloadEvents();
+        super.onResume();
+    }
+
     private CameraUpdate getCurrentLocation(){
         if(ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED){
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -88,29 +93,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return point;
         }
         return CameraUpdateFactory.newLatLngZoom(new LatLng(55.4038, 10.4024), 12.0f);
-    }
-
-    private void loadFieldsIntoMap(GoogleMap map){
-        Field.getAllFields(this, data -> {
-            fields = data;
-
-            for(int i = 0; i < fields.size(); i++){
-                Field field = fields.get(i);
-                float color = BitmapDescriptorFactory.HUE_RED;
-                if(field.event_today){
-                    color = BitmapDescriptorFactory.HUE_GREEN;
-                }
-                MarkerOptions marker = new MarkerOptions()
-                        .position(new LatLng(field.lat, field.lon))
-                        .title(String.valueOf(field.id))
-                        .icon(BitmapDescriptorFactory.defaultMarker(color));
-                Marker m = map.addMarker(marker);
-                markerMap.put(m, field);
-            }
-        }, error -> {
-
-        });
-
     }
 
     @Override
@@ -130,7 +112,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             map.setMyLocationEnabled(true);
         }
         map.moveCamera(getCurrentLocation());
-        loadFieldsIntoMap(map);
+        event_map = map;
+        loadFieldsIntoMap();
     }
 
     @Override
@@ -154,14 +137,50 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+        if(item.getItemId() == R.id.reload_events){
+            reloadEvents();
+        }
+
+        if(item.getItemId() == R.id.my_joined_events){
+            //Intent intent = new Intent(this, )
+        }
+
         if(item.getItemId() == R.id.logout){
             active = false;
             finish();
         }
 
+
         return true;
     }
 
+    private void loadFieldsIntoMap(){
+        Field.getAllFields(this, fields -> {
+            for(int i = 0; i < fields.size(); i++){
+                Field field = fields.get(i);
+                float color = BitmapDescriptorFactory.HUE_RED;
+                if(field.event_today){
+                    color = BitmapDescriptorFactory.HUE_GREEN;
+                }
+                MarkerOptions marker = new MarkerOptions()
+                        .position(new LatLng(field.lat, field.lon))
+                        .title(String.valueOf(field.id))
+                        .icon(BitmapDescriptorFactory.defaultMarker(color));
+                Marker m = event_map.addMarker(marker);
+                markerMap.put(m, field);
+            }
+        }, error -> {
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void reloadEvents(){
+        markerMap.forEach( (marker, field) -> {
+            marker.remove();
+        });
+        markerMap.clear();
+        loadFieldsIntoMap();
+    }
     /*
      * Open MakerEvents activity. Contains a recyclerview with the events for this field
      */
@@ -169,7 +188,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(this, MarkerEvents.class);
         intent.putExtra("fieldID", Integer.parseInt(marker.getTitle()));
-        intent.putExtra("userID", userID);
         startActivity(intent);
         return true;
     }

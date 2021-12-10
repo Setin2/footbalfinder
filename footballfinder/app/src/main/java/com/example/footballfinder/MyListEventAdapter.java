@@ -1,9 +1,12 @@
 package com.example.footballfinder;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,12 +20,14 @@ import java.util.Locale;
  */
 public class MyListEventAdapter extends RecyclerView.Adapter<MyListEventAdapter.ViewHolder>{
     private ArrayList<Event> events;
+    private Context con;
 
     /*
      * Constructor
      */
-    public MyListEventAdapter(ArrayList<Event> viewableEvents) {
+    public MyListEventAdapter(ArrayList<Event> viewableEvents, Context con) {
         this.events = viewableEvents;
+        this.con = con;
     }
 
     /*
@@ -48,9 +53,16 @@ public class MyListEventAdapter extends RecyclerView.Adapter<MyListEventAdapter.
         holder.eventOwner.setText(event.owner_username);
 
         holder.description.setText(event.description);
-        holder.maxParticipants.setText(String.valueOf(event.maxParticipant));
+        holder.maxParticipants.setText("Max participants: " + event.maxParticipant);
 
         holder.event_time.setText(event.start_time + " - " + event.end_time);
+
+        holder.join.setOnClickListener( v -> {
+            Intent intent = new Intent(con, JoinActivity.class);
+            intent.putExtra("eventID", event.id);
+
+            con.startActivity(intent);
+        });
     }
 
     /*
@@ -79,12 +91,15 @@ public class MyListEventAdapter extends RecyclerView.Adapter<MyListEventAdapter.
         public TextView maxParticipants;
         public TextView description;
         public TextView event_time;
+        public Button join;
         ViewHolder(View itemView) {
             super(itemView);
             this.eventOwner = itemView.findViewById(R.id.eventOwner);
             this.maxParticipants = itemView.findViewById(R.id.maxParticipants);
             this.description = itemView.findViewById(R.id.description);
             this.event_time = itemView.findViewById(R.id.event_time);
+            this.join = itemView.findViewById(R.id.join);
+
         }
     }
 }

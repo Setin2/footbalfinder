@@ -27,13 +27,12 @@ import java.util.Objects;
 
 public class MarkerEvents extends AppCompatActivity {
 
-    public static RecyclerView recyclerView;
-    public static MyListEventAdapter adapter;
-    public static ArrayList<Event> viewableEvents;
+    public RecyclerView recyclerView;
+    public MyListEventAdapter adapter;
+    public ArrayList<Event> viewableEvents;
     private ArrayList<Event> events;
     private LinearLayoutManager manager;
     private int fieldID;
-    private int userID;
 
     private boolean isScrolling;                        // boolean telling if the user is scrolling
     int currentItems, totalItems, scrollOutItems;       // variables used for getting the position of the screen in the recyclerview
@@ -43,7 +42,6 @@ public class MarkerEvents extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fieldID = getIntent().getIntExtra("fieldID", -1);
-        userID = getIntent().getIntExtra("userID", -1);
         // set binding
         ActivityMarkerEventsBinding binding = ActivityMarkerEventsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -57,11 +55,14 @@ public class MarkerEvents extends AppCompatActivity {
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(getApplicationContext(), AddEvent.class);
             intent.putExtra("fieldID", fieldID);
-            intent.putExtra("userID", userID);
             startActivity(intent);
         });
+    }
 
+    @Override
+    protected void onResume() {
         loadEvents();
+        super.onResume();
     }
 
     private void loadEvents(){
@@ -71,13 +72,12 @@ public class MarkerEvents extends AppCompatActivity {
         Event.getEventsOnFieldToday(this, fieldID, events -> {
 
             for(int i = 0; i < events.size(); i++){
-                Logger.log(events.get(i).description);
                 viewableEvents.add(events.get(i));
             }
             recyclerView = findViewById(R.id.events);
             manager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(manager);
-            adapter = new MyListEventAdapter(viewableEvents);
+            adapter = new MyListEventAdapter(viewableEvents, this);
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(adapter);
 
@@ -85,7 +85,6 @@ public class MarkerEvents extends AppCompatActivity {
             itemDecorator.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(getApplicationContext(), R.drawable.divider)));
             recyclerView.addItemDecoration(itemDecorator);
             scrolling();
-            Logger.log(viewableEvents.size());
         }, error -> {
 
         });

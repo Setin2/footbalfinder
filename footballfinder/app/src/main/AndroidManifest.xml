@@ -20,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FootballFinder">
         <activity
+            android:name=".JoinActivity"
+            android:exported="false" />
+        <activity
             android:name=".AddEvent"
             android:exported="false"
             android:label="@string/title_activity_add_event"

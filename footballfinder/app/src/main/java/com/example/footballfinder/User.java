@@ -18,7 +18,7 @@ public class User {
     int id;
     String username;
     String password;
-
+    private static User loggedInAsUser;
     /*
      * Constructor
      */
@@ -26,6 +26,13 @@ public class User {
         this.id = id;
         this.username = name;
         this.password = password;
+    }
+
+    public static User getCurrentUser(){
+        if(loggedInAsUser == null){
+            return new User(-1, "", "");
+        }
+        return loggedInAsUser;
     }
 
     public static void userLogin(Context con, String username, String password, Consumer<User> consumer, Consumer<VolleyError> errorHandler){
@@ -45,12 +52,17 @@ public class User {
 
                 User user = getUserFromJSON(user_data);
 
+                loggedInAsUser = user;
+
                 consumer.accept(user);
             }catch (Exception e){
                 consumer.accept(null);
             }
-
-        }, errorHandler::accept);
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
 
     }
 
@@ -75,8 +87,12 @@ public class User {
             }catch (Exception e){
                 consumer.accept(null);
             }
+            http.stopQueue();
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
 
-        }, errorHandler::accept);
+        });
 
     }
 
