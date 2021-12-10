@@ -25,11 +25,12 @@ public class Event {
     public String end_time;
     public String owner_username;
     public int participants;
+    public String location;
 
     /*
      * Constructor
      */
-    public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time, String owner_username, int participants){
+    public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time, String owner_username, int participants, String location){
         this.id = id;
         this.fieldID = fieldID;
         this.maxParticipant = maxParticipant;
@@ -39,10 +40,11 @@ public class Event {
         this.end_time = end_time;
         this.owner_username = owner_username;
         this.participants = participants;
+        this.location = location;
     }
 
     public Event(int id, int fieldID, int maxParticipant, int ownerID, String description, String start_time, String end_time){
-        this(id, fieldID, maxParticipant, ownerID, description, start_time, end_time, "", 0);
+        this(id, fieldID, maxParticipant, ownerID, description, start_time, end_time, "", 0, "");
     }
 
     public static void getEventsOnFieldToday(Context con, int fieldID, Consumer<ArrayList<Event>> consumer, Consumer<VolleyError> errorHandler){
@@ -156,6 +158,37 @@ public class Event {
         });
     }
 
+    public static void getJoinedEvents(Context con, int userID, Consumer<ArrayList<Event>> consumer, Consumer<VolleyError> errorHandler){
+        httpHelper http = new httpHelper(con);
+        ArrayList<Event> events = new ArrayList<>();
+        JSONObject body = new JSONObject();
+        try{
+            body.put("case", "getjoinedevents");
+            body.put("user_id", userID);
+        }catch(Exception e){
+
+        }
+
+        http.postRequest(body, data -> {
+            try{
+                JSONArray events_data = (JSONArray) data.get("data");
+                for(int i = 0; i < events_data.length(); i++){
+                    JSONObject e = (JSONObject) events_data.get(i);
+                    Event event = eventFromJSON(e);
+                    events.add(event);
+                }
+                consumer.accept(events);
+            }catch (Exception e){
+            }
+            http.stopQueue();
+
+        }, err -> {
+            errorHandler.accept(err);
+            http.stopQueue();
+        });
+
+    }
+
     public static Event eventFromJSON(JSONObject event_json) throws Exception{
         Event event = new Event(
                 event_json.getInt("id"),
@@ -166,7 +199,8 @@ public class Event {
                 event_json.getString("start_time"),
                 event_json.getString("end_time"),
                 event_json.getString("owner_username"),
-                event_json.getInt("participants")
+                event_json.getInt("participants"),
+                event_json.getString("location")
                 );
 
         return event;

@@ -130,7 +130,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         if(item.getItemId() == R.id.my_joined_events){
-            //Intent intent = new Intent(this, )
+            Intent intent = new Intent(this, MyJoinedEventsActivity.class);
+            startActivity(intent);
         }
 
         if(item.getItemId() == R.id.logout){
