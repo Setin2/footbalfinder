@@ -1,4 +1,4 @@
-package com.example.footballfinder;
+package com.example.footballfinder.utilities;
 
 import android.util.Log;
 

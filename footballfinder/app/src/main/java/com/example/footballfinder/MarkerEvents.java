@@ -1,16 +1,12 @@
 package com.example.footballfinder;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.View;
 import android.widget.AbsListView;
 
-import com.google.android.gms.maps.model.Marker;
+import com.example.footballfinder.classes.Event;
+import com.example.footballfinder.utilities.MyListEventAdapter;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

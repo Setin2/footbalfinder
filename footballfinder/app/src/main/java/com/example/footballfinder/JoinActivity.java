@@ -1,13 +1,12 @@
 package com.example.footballfinder;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextClock;
 import android.widget.TextView;
 
+import com.example.footballfinder.classes.Event;
+import com.example.footballfinder.classes.User;
 import com.google.android.material.snackbar.Snackbar;
 
 public class JoinActivity extends AppCompatActivity {

@@ -1,7 +1,9 @@
-package com.example.footballfinder;
+package com.example.footballfinder.utilities;
 
 import android.content.Context;
 import android.content.Intent;
+
+import com.example.footballfinder.classes.User;
 
 public class Debug {
 
