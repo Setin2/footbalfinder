@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Debug.testActivity(this, MapsActivity.class); //Debugging
+        //Debug.testActivity(this, MapsActivity.class); //Debugging
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
