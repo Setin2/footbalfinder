@@ -8,12 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.footballfinder.utilities.Debug;
 import com.example.footballfinder.utilities.Internet;
 import com.example.footballfinder.classes.User;
 import com.google.android.material.snackbar.Snackbar;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void openMapActivity(){
         if(MapsActivity.active == false){
-            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
             startActivity(intent);
         }
 
